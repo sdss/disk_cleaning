@@ -23,6 +23,10 @@ def cleanMJD(mjd, path, logPath, keepFor=30):
 
     todayDir = os.path.join(path, str(mjd))
 
+    if not os.path.isdir(todayDir):
+        print(f"No data for {mjd}")
+        return None
+
     files = os.listdir(todayDir)
 
     utahFileList = os.path.join(logPath, str(mjd))
@@ -30,16 +34,19 @@ def cleanMJD(mjd, path, logPath, keepFor=30):
         lines = of.readlines()
         utahFiles = [l.strip() for l in lines]
 
+    count = 0
     for f in files:
         if f not in utahFiles:
             # maybe email here?
             print("MISSING ", f)
             continue
-        fullPath = os.path.path.join(todayDir, f)
+        fullPath = os.path.join(todayDir, f)
         timeStamp = os.path.getmtime(fullPath)
         if (unixNow - timeStamp) / secInDay > keepFor:
             # os.remove(fullPath)
-            print(fullPath)
+            # print(fullPath)
+            count += 1
+    print(f"removed {count} of {len(files)} files in {todayDir}")
 
 
 def checkMJDs(path, logPath, keepFor=30):
