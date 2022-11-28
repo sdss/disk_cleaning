@@ -25,11 +25,15 @@ def cleanMJD(mjd, path, logPath, keepFor=30):
 
     files = os.listdir(todayDir)
 
-    utahFiles = os.listdir(os.path.join(logPath, str(mjd)))
+    utahFileList = os.path.join(logPath, str(mjd))
+    with open(utahFileList, "r") as of:
+        lines = of.readlines()
+        utahFiles = [l.strip() for l in lines]
 
     for f in files:
         if f not in utahFiles:
             # maybe email here?
+            print("MISSING ", f)
             continue
         fullPath = os.path.path.join(todayDir, f)
         timeStamp = os.path.getmtime(fullPath)

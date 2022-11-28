@@ -31,9 +31,10 @@ def checkForNew(path, cachePath):
 
     mjds = os.listdir(path)
     for mjd in mjds:
-        fpath = os.join(cachePath, mjd)
+        fpath = os.path.join(cachePath, mjd)
         if not os.path.isfile(fpath):
-            print(listMJD(mjd, path), file=fpath)
+            with open(fpath, "w") as sumFile:
+                print(listMJD(mjd, path), file=sumFile)
 
 
 if __name__ == "__main__":
@@ -42,10 +43,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=description, usage=usage)
     parser.add_argument("-p", "--product", dest="prod", type=str,
                         required=True, help="product to check")
+    parser.add_argument("-o", "--obs", dest="obs", type=str,
+                        required=True, help="product to check")
 
     args = parser.parse_args()
     prod = args.prod
+    obs = args.obs
 
     path = "/uufs/chpc.utah.edu/common/home/sdss50/sdsswork/data/staging/"
+    path = os.path.join(path, obs)
+    path = os.path.join(path, prod)
     cachePath = os.path.join(os.path.expanduser("~/mjdSummaries"), prod)
     checkForNew(path, cachePath)
