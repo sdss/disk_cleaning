@@ -1,0 +1,12 @@
+#!/bin/bash
+
+NOW=$(date +"%Y%m%d")
+
+logfile="/data/logs/cleanup/gcam/${NOW}.log"
+
+cleanData.py -p gcam |& tee ${logfile}
+
+logfile="/data/logs/cleanup/fcam/${NOW}.log"
+
+cleanData.py -p fcam |& tee ${logfile}
+

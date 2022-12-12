@@ -1,0 +1,21 @@
+#%Module1.0
+#
+proc ModulesHelp { } {
+    global product version
+    puts stderr "This module adds $product/$version to your environment."
+}
+set product cleanup
+set version main
+conflict $product
+#
+module-whatis "Sets up $product/$version in your environment."
+#
+# ENVIRONMENT SECTION
+#
+set PRODUCT_ROOT /home/sdss5/software
+set PRODUCT_DIR $PRODUCT_ROOT/$product/$version
+setenv [string toupper $product]_DIR $PRODUCT_DIR
+#
+# Add any non-standard Module code below this point.
+
+prepend-path PATH       $PRODUCT_DIR/bin

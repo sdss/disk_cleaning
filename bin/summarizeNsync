@@ -1,0 +1,7 @@
+#!/bin/bash
+
+writeSummary.py -p gcam -o ${OBS}
+writeSummary.py -p fcam -o ${OBS}
+
+rsync -avz ~/mjdSummaries/gcam ${HOST}:/data/logs/utahFiles/gcam
+rsync -avz ~/mjdSummaries/fcam ${HOST}:/data/logs/utahFiles/fcam

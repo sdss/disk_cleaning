@@ -1,0 +1,25 @@
+#%Module1.0
+#
+proc ModulesHelp { } {
+    global product version
+    puts stderr "This module adds $product/$version to your environment."
+}
+set product cleanup
+set gitvers main
+set version to_apo
+conflict $product
+#
+module-whatis "Sets up $product/$version in your environment."
+#
+# ENVIRONMENT SECTION
+#
+set PRODUCT_ROOT /home/software/github/sdss
+set PRODUCT_DIR $PRODUCT_ROOT/$product/$gitvers
+setenv [string toupper $product]_DIR $PRODUCT_DIR
+#
+# Add any non-standard Module code below this point.
+
+setenv [string toupper $product]_HOST sdss5-db
+setenv OBS apo
+
+prepend-path PATH       $PRODUCT_DIR/bin
