@@ -50,8 +50,7 @@ if __name__ == "__main__":
     prod = args.prod
     obs = args.obs
 
-    path = "/uufs/chpc.utah.edu/common/home/sdss50/sdsswork/data/staging/"
-    path = os.path.join(path, obs)
-    path = os.path.join(path, prod)
-    cachePath = os.path.join(os.path.expanduser("~/mjdSummaries"), prod)
-    checkForNew(path, cachePath)
+    sas_path = "/uufs/chpc.utah.edu/common/home/sdss50/sdsswork/data"
+    staging_path = os.path.join(sas_path, "staging", obs , prod)
+    summaries_path = os.path.join(sas_path, "summaries", obs , prod)
+    checkForNew(staging_path, summaries_path)
