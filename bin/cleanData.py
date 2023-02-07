@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+from pathlib import Path
 import time
 import argparse
 import json
@@ -33,7 +34,7 @@ def cleanMJD(mjd, dataRoot, logRoot, product, keepFor=30):
         print(f"skipping {productMjd}; too recent to clean")
         return
 
-    countFiles = len(os.listdir(productMjd))
+    countFiles = len(list(Path(productMjd).rglob("*")))
 
     todayDir = os.path.join(logRoot, str(mjd))
     prodJson = os.path.join(todayDir, f"{product}-{mjd}.json")
@@ -52,7 +53,7 @@ def cleanMJD(mjd, dataRoot, logRoot, product, keepFor=30):
             # os.remove(localPath)
             # print(fullPath)
             count += 1
-    print(f"removed {count} of {len(countFiles)} files in {productMjd}")
+    print(f"removed {count} of {countFiles} files in {productMjd}")
 
 
 def checkMJDs(dataRoot, logRoot, product, keepFor=30):
@@ -65,18 +66,18 @@ def checkMJDs(dataRoot, logRoot, product, keepFor=30):
        product: str, product to clean
     """
 
-    mjds = os.listdir(path)
+    mjds = os.listdir(logRoot)
     for mjd in mjds:
-        todayDir = os.path.join(path, str(mjd))
-
-        timeStamp = os.path.getmtime(todayDir)
+        productRoot = os.path.join(dataRoot, product)
+        productMjd = os.path.join(productRoot, str(mjd))
+        timeStamp = os.path.getmtime(productMjd)
         if (unixNow - timeStamp) / secInDay < keepFor:
             continue
 
-        files = os.listdir(todayDir)
+        files = list(Path(productMjd).rglob("*"))
 
         if len(files) > 0:
-            cleanMJD(mjd, path, logPath, keepFor=keepFor)
+            cleanMJD(mjd, dataRoot, logRoot, product, keepFor=keepFor)
 
 
 if __name__ == "__main__":
