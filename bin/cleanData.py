@@ -29,9 +29,11 @@ def cleanMJD(mjd, dataRoot, logRoot, product, keepFor=30):
     productRoot = os.path.join(dataRoot, product)
     productMjd = os.path.join(productRoot, str(mjd))
     timeStamp = os.path.getmtime(productMjd)
-    if (unixNow - timeStamp) / secInDay > keepFor:
+    if (unixNow - timeStamp) / secInDay < keepFor:
         print(f"skipping {productMjd}; too recent to clean")
         return
+
+    countFiles = len(os.listdir(productMjd))
 
     todayDir = os.path.join(logRoot, str(mjd))
     prodJson = os.path.join(todayDir, f"{product}-{mjd}.json")
@@ -50,7 +52,7 @@ def cleanMJD(mjd, dataRoot, logRoot, product, keepFor=30):
             # os.remove(localPath)
             # print(fullPath)
             count += 1
-    print(f"removed {count} of {len(files)} files in {productMjd}")
+    print(f"removed {count} of {len(countFiles)} files in {productMjd}")
 
 
 def checkMJDs(dataRoot, logRoot, product, keepFor=30):
@@ -87,7 +89,7 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--product", dest="prod", type=str,
                         required=True, help="product to clean")
     parser.add_argument("-r", "--root", dest="root", type=str,
-                        required=False, help="product root, top level of mjds",
+                        required=False, help="data root",
                         default=None)
     parser.add_argument("-l", "--log", dest="log", type=str,
                         required=False, help="path to logs from utah",
