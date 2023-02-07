@@ -3,58 +3,64 @@
 import os
 import time
 import argparse
+import json
+from datetime import datetime, timezone
 
 unixNow = time.time()
 secInDay = 60 * 60 * 24
 
+timeFstr = "%Y-%m-%d %H:%M:%S.%f %z"
 
-def cleanMJD(mjd, path, logPath, keepFor=30):
+def cleanMJD(mjd, dataRoot, logRoot, product, keepFor=30):
     """Clean an MJD worth of files,
        if the files are at utah.
 
        mjd: int, mjd to clean
 
-       path: str, path to top level dir
+       dataRoot: str, path to top level data dir
 
-       logPath: str, path to top level dir of utah files
+       logRoot: str, path to top level dir of utah files
+
+       product: str, product to clean
 
        keepFor: int, days to keep files on disk
     """
+    
+    productRoot = os.path.join(dataRoot, product)
+    productMjd = os.path.join(productRoot, str(mjd))
+    timeStamp = os.path.getmtime(productMjd)
+    if (unixNow - timeStamp) / secInDay > keepFor:
+        print(f"skipping {productMjd}; too recent to clean")
+        return
 
-    todayDir = os.path.join(path, str(mjd))
+    todayDir = os.path.join(logRoot, str(mjd))
+    prodJson = os.path.join(todayDir, f"{product}-{mjd}.json")
 
-    if not os.path.isdir(todayDir):
-        print(f"No data for {mjd}")
-        return None
-
-    files = os.listdir(todayDir)
-
-    utahFileList = os.path.join(logPath, str(mjd))
-    with open(utahFileList, "r") as of:
-        lines = of.readlines()
-        utahFiles = [l.strip() for l in lines]
+    utahFileList = json.load(open(prodJson))
 
     count = 0
-    for f in files:
-        if f not in utahFiles:
-            # maybe email here?
-            print("MISSING ", f)
-            continue
-        fullPath = os.path.join(todayDir, f)
-        timeStamp = os.path.getmtime(fullPath)
-        if (unixNow - timeStamp) / secInDay > keepFor:
-            # os.remove(fullPath)
+    for f in utahFileList:
+        localPath = os.path.join(dataRoot, f["location"])
+        timeStamp = os.path.getmtime(localPath)
+        uTimeStamp = f["mtime"].replace("MDT","-0600").replace("MST","-0700")
+        utahTime = datetime.strptime(uTimeStamp, timeFstr)
+        tzStamped = datetime.fromtimestamp(timeStamp, timezone.utc)
+        delta = utahTime - tzStamped
+        if delta.microseconds == 0:
+            # os.remove(localPath)
             # print(fullPath)
             count += 1
-    print(f"removed {count} of {len(files)} files in {todayDir}")
+    print(f"removed {count} of {len(files)} files in {productMjd}")
 
 
-def checkMJDs(path, logPath, keepFor=30):
+def checkMJDs(dataRoot, logRoot, product, keepFor=30):
     """check for new mjds
 
-       path: str, path to top level prod dir
+       dataRoot: str, path to top level data dir
 
-       cachePath: str, path to file summaries
+       logRoot: str, path to top level dir of utah files
+
+       product: str, product to clean
     """
 
     mjds = os.listdir(path)
@@ -85,26 +91,26 @@ if __name__ == "__main__":
                         default=None)
     parser.add_argument("-l", "--log", dest="log", type=str,
                         required=False, help="path to logs from utah",
-                        default="/data/logs/utahFiles")
+                        default="/data/sas/summaries")
     parser.add_argument("-k", "--keep", dest="keep", type=int,
                         required=False, help="days to keep files on disk",
                         default=30)
 
     args = parser.parse_args()
     mjd = args.mjd
-    prod = args.prod
+    product = args.prod
     root = args.root
-    log = args.log
+    logRoot = args.log
     keep = args.keep
 
     if not root:
-        path = os.path.join("/data", prod)
+        dataRoot = "/data"
     else:
-        path = root
+        dataRoot = root
 
-    logPath = os.path.join(log, prod)
+    # logPath = os.path.join(log, prod)
 
     if mjd:
-        cleanMJD(mjd, path, logPath, keepFor=keep)
+        cleanMJD(mjd, dataRoot, logRoot, product, keepFor=keep)
     else:
-        checkMJDs(path, logPath, keepFor=keep)
+        checkMJDs(dataRoot, logRoot, product, keepFor=keep)
