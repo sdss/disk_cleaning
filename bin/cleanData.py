@@ -42,18 +42,26 @@ def cleanMJD(mjd, dataRoot, logRoot, product, keepFor=30):
     utahFileList = json.load(open(prodJson))
 
     count = 0
+    skipped = list()
     for f in utahFileList:
         localPath = os.path.join(dataRoot, f["location"])
-        timeStamp = os.path.getmtime(localPath)
         uTimeStamp = f["mtime"].replace("MDT","-0600").replace("MST","-0700")
         utahTime = datetime.strptime(uTimeStamp, timeFstr)
-        tzStamped = datetime.fromtimestamp(timeStamp, timezone.utc)
-        delta = utahTime - tzStamped
+        try:
+            timeStamp = os.path.getmtime(localPath)
+            tzStamped = datetime.fromtimestamp(timeStamp, timezone.utc)
+            delta = utahTime - tzStamped
+        except FileNotFoundError:
+            print(f"local file {f['location']} not found")
+            continue
         if delta.microseconds == 0:
-            # os.remove(localPath)
-            # print(fullPath)
+            os.remove(localPath)
             count += 1
+        else:
+            skipped.append(f["location"])
     print(f"removed {count} of {countFiles} files in {productMjd}")
+    for fname in skipped:
+        print(f"WARN: skipped {fname}")
 
 
 def checkMJDs(dataRoot, logRoot, product, keepFor=30):
@@ -70,7 +78,10 @@ def checkMJDs(dataRoot, logRoot, product, keepFor=30):
     for mjd in mjds:
         productRoot = os.path.join(dataRoot, product)
         productMjd = os.path.join(productRoot, str(mjd))
-        timeStamp = os.path.getmtime(productMjd)
+        try:
+            timeStamp = os.path.getmtime(productMjd)
+        except FileNotFoundError:
+            continue
         if (unixNow - timeStamp) / secInDay < keepFor:
             continue
 
