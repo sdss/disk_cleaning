@@ -90,6 +90,9 @@ def checkMJDs(dataRoot, logRoot, product, keepFor=30):
         # top level dirs left, 3 for gcam, 0 for fcam.
         # not ideal? maybe refactor, definitely don't forget
         if len(files) > 3:
+            if (unixNow - timeStamp) / secInDay > 90:
+                print(f"[WARN] there are old files in {productMjd}")
+                continue
             cleanMJD(mjd, dataRoot, logRoot, product, keepFor=keepFor)
 
 
