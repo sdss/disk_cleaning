@@ -87,7 +87,9 @@ def checkMJDs(dataRoot, logRoot, product, keepFor=30):
 
         files = list(Path(productMjd).rglob("*"))
 
-        if len(files) > 0:
+        # top level dirs left, 3 for gcam, 0 for fcam.
+        # not ideal? maybe refactor, definitely don't forget
+        if len(files) > 3:
             cleanMJD(mjd, dataRoot, logRoot, product, keepFor=keepFor)
 
 
