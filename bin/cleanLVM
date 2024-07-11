@@ -1,0 +1,8 @@
+#!/bin/bash
+
+NOW=$(date +"%Y%m%d")
+
+logfile="/data/logs/cleanup/agcam/${NOW}.log"
+
+cleanData.py -p agcam |& tee ${logfile}
+

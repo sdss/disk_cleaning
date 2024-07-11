@@ -37,14 +37,14 @@ def cleanMJD(mjd, dataRoot, logRoot, product, keepFor=30):
     countFiles = len(list(Path(productMjd).rglob("*")))
 
     todayDir = os.path.join(logRoot, str(mjd))
-    prodJson = os.path.join(todayDir, f"{product}-{mjd}.json")
+    prodJson = os.path.join(todayDir, f"lvm_{product}-{mjd}.json")
 
     utahFileList = json.load(open(prodJson))
 
     count = 0
     skipped = list()
     for f in utahFileList:
-        localPath = os.path.join(dataRoot, f["location"])
+        localPath = os.path.join(dataRoot, f["location"].replace("lvm_", ""))
         uTimeStamp = f["mtime"].replace("MDT","-0600").replace("MST","-0700")
         utahTime = datetime.strptime(uTimeStamp, timeFstr)
         try:
@@ -92,7 +92,7 @@ def checkMJDs(dataRoot, logRoot, product, keepFor=30):
         if len(files) > 3:
             if (unixNow - timeStamp) / secInDay > 90:
                 print(f"[WARN] there are old files in {productMjd}")
-                continue
+                # continue
             cleanMJD(mjd, dataRoot, logRoot, product, keepFor=keepFor)
 
 
