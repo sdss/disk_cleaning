@@ -47,6 +47,8 @@ def cleanMJD(mjd, dataRoot, logRoot, product, keepFor=30):
         localPath = os.path.join(dataRoot, f["location"])
         uTimeStamp = f["mtime"].replace("MDT","-0600").replace("MST","-0700")
         utahTime = datetime.strptime(uTimeStamp, timeFstr)
+        if "boss" in localPath:
+            localPath = localPath.replace("boss/", "")
         try:
             timeStamp = os.path.getmtime(localPath)
             tzStamped = datetime.fromtimestamp(timeStamp, timezone.utc)

@@ -10,3 +10,6 @@ logfile="/data/logs/cleanup/fcam/${NOW}.log"
 
 cleanData.py -p fcam |& tee ${logfile}
 
+logfile="/data/logs/cleanup/spectro/${NOW}.log"
+
+cleanData.py -p spectro -k 60 |& tee ${logfile}
