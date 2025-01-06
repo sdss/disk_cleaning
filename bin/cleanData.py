@@ -6,6 +6,7 @@ import time
 import argparse
 import json
 from datetime import datetime, timezone
+from subprocess import check_output
 
 unixNow = time.time()
 secInDay = 60 * 60 * 24
@@ -94,6 +95,10 @@ def checkMJDs(dataRoot, logRoot, product, keepFor=30):
         if len(files) > 3:
             if (unixNow - timeStamp) / secInDay > 90:
                 print(f"[WARN] there are old files in {productMjd}")
+                continue
+            res = check_output(["du", "-hd 1", productMjd])
+            if "G" not in res.decode().split("\n")[-2]:
+                print(f"[WARN] partially cleaned {productMjd}")
                 continue
             cleanMJD(mjd, dataRoot, logRoot, product, keepFor=keepFor)
 
