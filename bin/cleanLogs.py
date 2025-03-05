@@ -35,7 +35,7 @@ def cleanProduct(productDir, keep_for=30):
             skipped += 1
             continue
         count +=1
-        os.remove(localPath)
+        os.remove(path)
     print(f"cleaned {count} from {productDir}, skipped {skipped}")
     
     return subdirs
